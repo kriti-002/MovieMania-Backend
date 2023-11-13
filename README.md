@@ -1,7 +1,7 @@
-### MovieMania Application
+# MovieMania Application
 The Movie Backend Application is a Spring Boot-based backend service for managing movie-related data. It provides RESTful APIs to perform operations on movies, reviews, shows, and theaters, with additional administrative capabilities for creating, updating, and deleting records.
 
-# Admin Requests
+### Admin Requests
 This collection contains all the Admin related requests.
 
 - Movie: Create, Update, Delete, Getting All movies, Get All Reviews of a movie.
@@ -24,7 +24,7 @@ This collection contains all the Admin related requests.
   - Delete Show: localhost:8080/admin/shows/delete?id=someNumber
 
 
-# Movie Requests
+### Movie Requests
 This collection contains the endpoints which helps to retrieve the movie by its attributes namely Genre, Title, Rating, Length and all the movies.
 - Get Movies by Genre: localhost:8080/movie/getMovieByGenre?genre=yourGenre
 - Get Movie by Title: localhost:8080/movie/getMovieByTitle?title=movieTitle
@@ -32,7 +32,7 @@ This collection contains the endpoints which helps to retrieve the movie by its 
 - Get Movies Greater than or equal to some Ratings: localhost:8080/movie/getMovieByRating?ratings=someRating
 - Get Movies by Length: localhost:8080/movie/getMovieByLength?time=someTime
 
-# Review Requests
+### Review Requests
 This collection contains the endpoints which helps to create, delete, update and retrieve the reviews by its attributes namely id and all the reviews.
 - Create Review: localhost:8080/review/add
 - Delete Review: localhost:8080/review/delete?id=someID
@@ -40,6 +40,6 @@ This collection contains the endpoints which helps to create, delete, update and
 - Find Review by ID: localhost:8080/review/getById?id=someID
 - Get all Reviews of a Movie: localhost:8080/review/getAll?movieId=someID
 
-# Show Requests
+### Show Requests
 This allows us to check all the available seats of a show.
 - Get Available Seats: localhost:8080/show/getAvailableSeats?id=someID
