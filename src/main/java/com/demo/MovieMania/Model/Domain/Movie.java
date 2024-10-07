@@ -1,11 +1,11 @@
 package com.demo.MovieMania.Model.Domain;
 
+import com.demo.MovieMania.Model.Domain.Enums.Genre;
 import com.demo.MovieMania.Model.Response.MovieResponse;
-import com.demo.MovieMania.Model.Response.ReviewResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.sql.Time;
 import java.util.ArrayList;
@@ -44,7 +44,13 @@ public class Movie {
     @OneToMany(mappedBy = "movie")
     List<Review> reviewList;
 
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @Builder.Default
+    List<Shows> showsList= new ArrayList<>();
+
     private Double ratings;
+
 
     public static MovieResponse toResponse(Movie m){
         return MovieResponse.builder()

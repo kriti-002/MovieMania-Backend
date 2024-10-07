@@ -47,6 +47,8 @@ public class Review {
     @JsonIgnore
     private Movie movie;
 
+    private String sentiment;
+
     public static ReviewResponse toResponseStatic(Review r){
         return ReviewResponse.builder()
                 .message("Done!")
@@ -54,6 +56,7 @@ public class Review {
                 .updatedDate(r.updated_date)
                 .review(r.review)
                 .ratings(r.ratings)
+                .sentiment(r.sentiment)
                 .build();
     }
     public static List<ReviewResponse> toResponseStatic(List<Review> reviewList){
@@ -67,6 +70,7 @@ public class Review {
                 .updatedDate(updated_date)
                 .review(review)
                 .ratings(ratings)
+                .sentiment(sentiment)
                 .build();
     }
 

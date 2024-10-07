@@ -20,11 +20,17 @@ public class ReviewService {
     @Autowired
     public MovieRepository movieRepository;
 
+    @Autowired
+    public ApiService apiService;
+
     public ReviewResponse addReview(Review r){
         Long id= r.getMovie().getId();
         System.out.println(id);
         Movie movie=movieRepository.findById(r.getMovie().getId()).orElse(null);
         reviewRepository.save(r);
+
+        String response= apiService.getExternalApiResponse();
+        r.setSentiment(response);
         if(movie!=null) {
             Double average = reviewRepository.getAverageReview(movie.getId());
             movie.setRatings(average);
@@ -49,6 +55,8 @@ public class ReviewService {
         if(r.getReview() != null) update.setReview(r.getReview());
         reviewRepository.save(update);
 
+        String response= apiService.getExternalApiResponse();
+        update.setSentiment(response);
         return update.toResponse("Updated the review.");
     }
 

@@ -1,6 +1,6 @@
 package com.demo.MovieMania.Model.Response;
 
-import com.demo.MovieMania.Model.Domain.Genre;
+import com.demo.MovieMania.Model.Domain.Enums.Genre;
 import lombok.*;
 
 import java.sql.Time;
@@ -20,4 +20,5 @@ public class MovieResponse {
     private Date date_of_release;
     private String message;
     private List<ReviewResponse> reviewList;
+    private String sentiment;
 }

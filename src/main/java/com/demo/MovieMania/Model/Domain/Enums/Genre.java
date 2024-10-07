@@ -1,4 +1,4 @@
-package com.demo.MovieMania.Model.Domain;
+package com.demo.MovieMania.Model.Domain.Enums;
 
 public enum Genre {
     ACTION,

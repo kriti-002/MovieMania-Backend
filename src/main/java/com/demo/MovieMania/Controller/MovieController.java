@@ -1,9 +1,7 @@
 package com.demo.MovieMania.Controller;
 
 
-import com.demo.MovieMania.Model.Domain.Genre;
-import com.demo.MovieMania.Model.Domain.Movie;
-import com.demo.MovieMania.Model.Domain.Review;
+import com.demo.MovieMania.Model.Domain.Enums.Genre;
 import com.demo.MovieMania.Model.Request.MovieRequest;
 import com.demo.MovieMania.Model.Response.MovieResponse;
 import com.demo.MovieMania.Model.Response.ReviewResponse;

@@ -17,4 +17,5 @@ public class ReviewResponse {
     private Date createdDate;
     private Date updatedDate;
     private String message;
+    private String sentiment;
 }
