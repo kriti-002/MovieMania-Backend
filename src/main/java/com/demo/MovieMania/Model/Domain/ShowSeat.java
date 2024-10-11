@@ -1,6 +1,7 @@
 package com.demo.MovieMania.Model.Domain;
 
 import com.demo.MovieMania.Model.Domain.Enums.Seat;
+import com.demo.MovieMania.Model.Response.ShowSeatResponse;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -9,6 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -27,7 +32,6 @@ public class ShowSeat {
     @Min(100)
     private Integer price;
 
-    @Max(50)
     @NotNull
     private String seatNumber;
 
@@ -38,5 +42,24 @@ public class ShowSeat {
     @ManyToOne
     @JoinColumn(name = "show_id", nullable = false)
     private Shows shows;
+
+    public static List<ShowSeatResponse> toResource(List<ShowSeat> seats) {
+
+        if (seats.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return seats.stream().map(ShowSeat::toResource).collect(Collectors.toList());
+    }
+
+    public static ShowSeatResponse toResource(ShowSeat seat) {
+
+        return ShowSeatResponse.builder()
+                .seatNumber(seat.getSeatNumber())
+                .price(seat.getPrice())
+                .type(seat.getType())
+                .isBooked(seat.getIsBooked())
+                .build();
+
+    }
 
 }

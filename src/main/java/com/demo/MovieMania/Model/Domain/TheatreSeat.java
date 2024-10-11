@@ -20,7 +20,6 @@ public class TheatreSeat {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Max(50)
     @NotNull
     private String seatNumber;
 

@@ -2,13 +2,9 @@ package com.demo.MovieMania.Model.Request;
 
 import com.demo.MovieMania.Model.Domain.Movie;
 import com.demo.MovieMania.Model.Domain.Review;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewRequest {

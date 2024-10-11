@@ -1,5 +1,6 @@
 package com.demo.MovieMania.Model.Domain;
 
+import com.demo.MovieMania.Model.Response.TheatreResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -23,14 +25,12 @@ public class Theatre {
     private Long id;
 
     @NotNull
-    @Max(100)
     private String name;
 
     @NotNull
     private String address;
 
     @NotNull
-    @Max(50)
     private String city;
 
     @OneToMany(mappedBy = "theatre", cascade = CascadeType.ALL)
@@ -42,4 +42,21 @@ public class Theatre {
     @JsonIgnore
     @Builder.Default
     private List<Shows> shows = new ArrayList<>();
+
+
+    public TheatreResponse toResponse(Theatre t){
+        return TheatreResponse.builder()
+                .Address(t.getAddress())
+                .city(t.getCity())
+                .name(t.getName())
+                .build();
+    }
+    public TheatreResponse toResponse(String message){
+        return TheatreResponse.builder()
+                .Address(address)
+                .city(city)
+                .name(name)
+                .message(message)
+                .build();
+    }
 }
