@@ -3,11 +3,16 @@ package com.demo.MovieMania.Service;
 import com.demo.MovieMania.Model.Domain.User;
 import com.demo.MovieMania.Model.Request.UserLoginRequest;
 import com.demo.MovieMania.Model.Request.UserRequest;
+import com.demo.MovieMania.Model.Response.UserLoginResponse;
 import com.demo.MovieMania.Model.Response.UserResponse;
 import com.demo.MovieMania.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +21,16 @@ import java.util.regex.Pattern;
 public class UserService {
     @Autowired
     public UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
     private static final String PASSWORD_REGEX =
             "^(?=.*[0-9])" +          // At least one digit
@@ -24,37 +39,9 @@ public class UserService {
                     "(?=.*[@#$%^&+=!])" +     // At least one special character from the set
                     "(?=\\S+$)" +             // No whitespace allowed
                     ".{8,20}$";               // Length between 8 and 20 characters
+    private static final Pattern MOBILE_PATTERN= Pattern.compile("^[6-9]\\d{9}$");
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(PASSWORD_REGEX);
-
-    public UserResponse addUser(UserRequest u) {
-        String mobile= u.getMobile(), email= u.getEmail(), password= u.getPassword();
-        if(mobile.length() != 10){
-            return UserResponse.builder().message("Please enter valid mobile number").build();
-        }
-        if(userRepository.existsByMobile(mobile)){
-            return UserResponse.builder().message("This mobile number already exists, try with a different number").build();
-        }
-        Matcher matcher1 = EMAIL_PATTERN.matcher(email);
-        if(!matcher1.matches() || userRepository.existsByEmail(email)) return UserResponse.builder().message("Please enter a valid email address").build();
-
-        Matcher matcher2= PASSWORD_PATTERN.matcher(password);
-        if(!matcher2.matches()) {
-            return UserResponse.builder().message("Please follow this guideline for the perfect password. " +
-                    "\n 1. At least one digit should be present." +
-                    "\n 2. At least one lowercase letter should be present." +
-                    "\n 3. At least one uppercase letter should be present." +
-                    "\n 4. At least one special character from [@#$%^&+=!] should be present." +
-                    "\n 5. No whitespace is allowed" +
-                    "\n 6. Length should be between 8 and 20 characters").build();
-        }
-        if(userRepository.existsByPassword(password)){
-            return UserResponse.builder().message("This password already exists, try again.").build();
-        }
-        User user= u.toRequest();
-        userRepository.save(user);
-        return user.toResponse("Created the user.");
-    }
 
     public String deleteUser(Long id) {
         boolean flag= userRepository.findById(id).isPresent();
@@ -78,31 +65,11 @@ public class UserService {
         User update= userRepository.findById(id).get();
 
         String mobile= ur.getMobile(), email= ur.getEmail(), password= ur.getPassword();
-        if( mobile != null && mobile.length() != 10){
-            return UserResponse.builder().message("Please enter valid mobile number").build();
-        }
-        if(mobile != null && userRepository.existsByMobile(mobile)){
-            return UserResponse.builder().message("This mobile number already exists, try with a different number").build();
-        }
-        if(email != null ){
-            Matcher matcher1 = EMAIL_PATTERN.matcher(email);
-            if(!matcher1.matches() || userRepository.existsByEmail(email)) return UserResponse.builder().message("Please enter a valid email address").build();
-        }
-        if(password != null){
-            Matcher matcher2= PASSWORD_PATTERN.matcher(password);
-            if(!matcher2.matches()) {
-                return UserResponse.builder().message("Please follow this guideline for the perfect password. " +
-                        "\n 1. At least one digit should be present." +
-                        "\n 2. At least one lowercase letter should be present." +
-                        "\n 3. At least one uppercase letter should be present." +
-                        "\n 4. At least one special character from [@#$%^&+=!] should be present." +
-                        "\n 5. No whitespace is allowed" +
-                        "\n 6. Length should be between 8 and 20 characters").build();
-            }
-            if(userRepository.existsByPassword(password)){
-                return UserResponse.builder().message("This password already exists, try again.").build();
-            }
-        }
+
+        if(!emailCheck(email)) return UserResponse.builder().message("Please enter a valid email address").build();
+        if(!passwordCheck(password)) return UserResponse.builder().message("Please follow the guidelines to write password.").build();
+        if(!userRepository.existsByPassword(passwordEncoder.encode(password))) return UserResponse.builder().message("Password Already Exists, enter a new password").build();
+        if(!mobileCheck(mobile)) return UserResponse.builder().message("Please enter a valid mobile number").build();
 
         User data= ur.toRequest();
 
@@ -116,4 +83,52 @@ public class UserService {
     }
 
 
+    public UserLoginResponse login(UserLoginRequest userLoginRequest) {
+        User authenticatedUser = authenticationService.authenticate(userLoginRequest);
+        //System.out.println(authenticatedUser.getId() + " " + authenticatedUser.getName());
+
+        HashMap<String, String> map= new HashMap<>();
+        map.put("Id", authenticatedUser.getId().toString());
+        map.put("Email", authenticatedUser.getEmail());
+        map.put("Role", authenticatedUser.getRole().toString());
+
+        String jwtToken = jwtService.generateToken(map, authenticatedUser);
+
+        return UserLoginResponse.builder()
+                .token(jwtToken)
+                .expiresIn(jwtService.getExpirationTime())
+                .message("I got the response.")
+                .build();
+    }
+
+    public UserResponse addUser(UserRequest userRequest) {
+        User registeredUser = authenticationService.signup(userRequest);
+        if(registeredUser != null) return registeredUser.toResponse("Signed Up");
+        return UserResponse.builder().message("Please check the guidelines before creating the account.").build();
+    }
+
+    public UserResponse authenticateUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User currentUser = (User) authentication.getPrincipal();
+
+        return currentUser.toResponse("I got my details.");
+    }
+    public boolean emailCheck(String email){
+        if(email == null) return false;
+        Matcher matcher1 = EMAIL_PATTERN.matcher(email);
+        return matcher1.matches() && !userRepository.existsByEmail(email);
+
+    }
+    public boolean passwordCheck(String password){
+        if(password == null) return false;
+        Matcher matcher2 = PASSWORD_PATTERN.matcher(password);
+        return matcher2.matches();
+
+    }
+    public boolean mobileCheck(String mobile){
+        if(mobile == null) return false;
+        Matcher matcher3= MOBILE_PATTERN.matcher(mobile);
+        return matcher3.matches() && !userRepository.existsByMobile(mobile);
+    }
 }

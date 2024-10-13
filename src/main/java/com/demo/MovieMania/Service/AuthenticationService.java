@@ -4,6 +4,7 @@ import com.demo.MovieMania.Model.Domain.User;
 import com.demo.MovieMania.Model.Request.UserLoginRequest;
 import com.demo.MovieMania.Model.Request.UserRequest;
 import com.demo.MovieMania.Repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,24 +12,27 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    private final AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    public AuthenticationService(
-            UserRepository userRepository,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private UserService userService;
 
     public User signup(UserRequest input) {
-        User user = input.toSignUpRequest(passwordEncoder.encode(input.getPassword()));
+        String email= input.getEmail(), password= input.getPassword(), mobile= input.getMobile();
+        String encodedPassword= passwordEncoder.encode(password);
+        if(!userService.mobileCheck(mobile) ||
+                !userService.passwordCheck(password) ||
+                !userRepository.existsByPassword(encodedPassword) ||
+                !userService.emailCheck(email)) return null;
+
+        User user = input.toSignUpRequest(encodedPassword);
         return userRepository.save(user);
     }
 
@@ -39,8 +43,6 @@ public class AuthenticationService {
                         input.getPassword()
                 )
         );
-
-        return userRepository.findByEmail(input.getEmail())
-                .orElseThrow();
+        return userRepository.findByEmail(input.getEmail()).orElseThrow();
     }
 }

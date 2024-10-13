@@ -32,11 +32,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, String> extraClaims, UserDetails userDetails) {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
@@ -45,7 +41,7 @@ public class JwtService {
     }
 
     private String buildToken(
-            Map<String, Object> extraClaims,
+            Map<String, String> extraClaims,
             UserDetails userDetails,
             long expiration
     ) {

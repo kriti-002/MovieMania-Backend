@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/admin/user")
 public class UserController {
@@ -20,29 +22,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AuthenticationService authenticationService;
-
     @PostMapping("/add")
     public UserResponse addUser(@RequestBody UserRequest userRequest){
-        User registeredUser = authenticationService.signup(userRequest);
-        return registeredUser.toResponse("Signed Up");
+        return userService.addUser(userRequest);
     }
     @PostMapping("/login")
     public UserLoginResponse login(@RequestBody UserLoginRequest userLoginRequest){
-        User authenticatedUser = authenticationService.authenticate(userLoginRequest);
-
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-
-        return UserLoginResponse.builder()
-                .token(jwtToken)
-                .expiresIn(jwtService.getExpirationTime())
-                .message("I got the response.")
-                .build();
-
+        return userService.login(userLoginRequest);
     }
     @DeleteMapping("/delete")
     public String deleteUser(@RequestParam Long id){
@@ -54,11 +40,7 @@ public class UserController {
     }
     @GetMapping("/me")
     public UserResponse authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        User currentUser = (User) authentication.getPrincipal();
-
-        return currentUser.toResponse("I got my details.");
+        return userService.authenticateUser();
     }
     @PutMapping("/update")
     public UserResponse updateUser(@RequestParam Long id, @RequestBody UserRequest u){
