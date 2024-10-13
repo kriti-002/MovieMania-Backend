@@ -1,6 +1,7 @@
 package com.demo.MovieMania.Config;
 
 import com.demo.MovieMania.Service.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.FilterChain;
@@ -21,20 +22,14 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter{
-    private final HandlerExceptionResolver handlerExceptionResolver;
+    @Autowired
+    private  HandlerExceptionResolver handlerExceptionResolver;
 
-    private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    private  JwtService jwtService;
 
-    public JwtAuthenticationFilter(
-            JwtService jwtService,
-            UserDetailsService userDetailsService,
-            HandlerExceptionResolver handlerExceptionResolver
-    ) {
-        this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
-        this.handlerExceptionResolver = handlerExceptionResolver;
-    }
+    @Autowired
+    private  UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(

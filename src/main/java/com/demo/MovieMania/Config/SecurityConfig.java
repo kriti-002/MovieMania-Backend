@@ -1,6 +1,8 @@
 package com.demo.MovieMania.Config;
 
 
+import com.demo.MovieMania.Model.Domain.Enums.Role;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -19,23 +21,21 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider
-    ) {
-        this.authenticationProvider = authenticationProvider;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").permitAll()  // Allow public access to /admin/** URLs
-                        .anyRequest().authenticated()  // Require authentication for all other requests
+                        .requestMatchers("/auth/**").permitAll()  // Allow public access to /auth/** URLs
+                        .requestMatchers("/admin/**").hasRole("ADMIN")  // Only ADMIN can access /admin/**
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")    // Only USER can access /user/**
+                        .anyRequest().hasRole("ADMIN")  // Only ADMIN can access all other requests
+
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Stateless session management
@@ -52,7 +52,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of("http://localhost:8080"));
-        configuration.setAllowedMethods(List.of("GET","POST"));
+        configuration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -1,5 +1,6 @@
 package com.demo.MovieMania.Model.Response;
 
+import com.demo.MovieMania.Model.Domain.Enums.Role;
 import lombok.*;
 
 @Getter
@@ -13,6 +14,8 @@ public class UserLoginResponse {
     private String token;
 
     private long expiresIn;
+
+    private Role role;
 
     private String message;
 

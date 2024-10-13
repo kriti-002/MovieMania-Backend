@@ -27,9 +27,12 @@ public class AuthenticationService {
     public User signup(UserRequest input) {
         String email= input.getEmail(), password= input.getPassword(), mobile= input.getMobile();
         String encodedPassword= passwordEncoder.encode(password);
+        System.out.println(userService.mobileCheck(mobile) + " " + userService.passwordCheck(password)
+        + " " + userService.emailCheck(email) + " " + userRepository.existsByPassword(encodedPassword));
+
         if(!userService.mobileCheck(mobile) ||
                 !userService.passwordCheck(password) ||
-                !userRepository.existsByPassword(encodedPassword) ||
+                userRepository.existsByPassword(encodedPassword) ||
                 !userService.emailCheck(email)) return null;
 
         User user = input.toSignUpRequest(encodedPassword);

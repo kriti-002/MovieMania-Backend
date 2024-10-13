@@ -22,11 +22,7 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
-    @Autowired
-    private JwtService jwtService;
 
-    @Autowired
-    private AuthenticationService authenticationService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -82,38 +78,6 @@ public class UserService {
         return update.toResponse("Updated the details");
     }
 
-
-    public UserLoginResponse login(UserLoginRequest userLoginRequest) {
-        User authenticatedUser = authenticationService.authenticate(userLoginRequest);
-        //System.out.println(authenticatedUser.getId() + " " + authenticatedUser.getName());
-
-        HashMap<String, String> map= new HashMap<>();
-        map.put("Id", authenticatedUser.getId().toString());
-        map.put("Email", authenticatedUser.getEmail());
-        map.put("Role", authenticatedUser.getRole().toString());
-
-        String jwtToken = jwtService.generateToken(map, authenticatedUser);
-
-        return UserLoginResponse.builder()
-                .token(jwtToken)
-                .expiresIn(jwtService.getExpirationTime())
-                .message("I got the response.")
-                .build();
-    }
-
-    public UserResponse addUser(UserRequest userRequest) {
-        User registeredUser = authenticationService.signup(userRequest);
-        if(registeredUser != null) return registeredUser.toResponse("Signed Up");
-        return UserResponse.builder().message("Please check the guidelines before creating the account.").build();
-    }
-
-    public UserResponse authenticateUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        User currentUser = (User) authentication.getPrincipal();
-
-        return currentUser.toResponse("I got my details.");
-    }
     public boolean emailCheck(String email){
         if(email == null) return false;
         Matcher matcher1 = EMAIL_PATTERN.matcher(email);

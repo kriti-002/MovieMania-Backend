@@ -16,33 +16,59 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 
 @RestController
-@RequestMapping("/admin/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/add")
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @PostMapping("/auth/add")
     public UserResponse addUser(@RequestBody UserRequest userRequest){
-        return userService.addUser(userRequest);
+        User registeredUser = authenticationService.signup(userRequest);
+        if(registeredUser != null) return registeredUser.toResponse("Signed Up");
+        return UserResponse.builder().message("Please check the guidelines before creating the account.").build();
     }
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public UserLoginResponse login(@RequestBody UserLoginRequest userLoginRequest){
-        return userService.login(userLoginRequest);
+        User authenticatedUser = authenticationService.authenticate(userLoginRequest);
+        //System.out.println(authenticatedUser.getId() + " " + authenticatedUser.getName());
+
+        HashMap<String, String> map= new HashMap<>();
+        map.put("Id", authenticatedUser.getId().toString());
+        map.put("Email", authenticatedUser.getEmail());
+        map.put("Role", authenticatedUser.getRole().toString());
+
+        String jwtToken = jwtService.generateToken(map, authenticatedUser);
+
+        return UserLoginResponse.builder()
+                .token(jwtToken)
+                .expiresIn(jwtService.getExpirationTime())
+                .message("I got the response.")
+                .role(authenticatedUser.getRole())
+                .build();
     }
-    @DeleteMapping("/delete")
+    @DeleteMapping("/admin/delete")
     public String deleteUser(@RequestParam Long id){
         return userService.deleteUser(id);
     }
-    @GetMapping("/get")
+    @GetMapping("/admin/get")
     public UserResponse getUser(@RequestParam Long id){
         return userService.getUser(id);
     }
-    @GetMapping("/me")
+    @GetMapping("/admin/me")
     public UserResponse authenticatedUser() {
-        return userService.authenticateUser();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User currentUser = (User) authentication.getPrincipal();
+
+        return currentUser.toResponse("I got my details.");
     }
-    @PutMapping("/update")
+    @PutMapping("/admin/update")
     public UserResponse updateUser(@RequestParam Long id, @RequestBody UserRequest u){
         return userService.updateUserDetails(id, u);
     }
