@@ -17,10 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Builder
@@ -68,6 +65,14 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_favorites",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "movie_id")
+    )
+    private List<Movie> favourite = new ArrayList<>();
+
     public UserResponse toResponse(String message){
         return UserResponse.builder()
                 .age(age)
@@ -77,6 +82,7 @@ public class User implements UserDetails {
                 .password(password)
                 .name(name)
                 .message(message)
+                .favourite(favourite != null ? favourite.stream().map(Movie::toResponse).toList() : Collections.emptyList())
                 .build();
     }
 
@@ -89,6 +95,7 @@ public class User implements UserDetails {
                 .mobile(u.getMobile())
                 .email(u.getEmail())
                 .age(u.getAge())
+                .favourite(u.getFavourite() != null ? u.getFavourite().stream().map(Movie::toResponse).toList() : Collections.emptyList())
                 .build();
     }
 

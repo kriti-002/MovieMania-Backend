@@ -31,6 +31,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
+                        //.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()  // Allow public access to /auth/** URLs
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // Only ADMIN can access /admin/**
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")    // Only USER can access /user/**

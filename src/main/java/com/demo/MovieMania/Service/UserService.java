@@ -1,18 +1,18 @@
 package com.demo.MovieMania.Service;
 
+import com.demo.MovieMania.Model.Domain.Movie;
 import com.demo.MovieMania.Model.Domain.User;
-import com.demo.MovieMania.Model.Request.UserLoginRequest;
 import com.demo.MovieMania.Model.Request.UserRequest;
-import com.demo.MovieMania.Model.Response.UserLoginResponse;
+import com.demo.MovieMania.Model.Response.MovieResponse;
 import com.demo.MovieMania.Model.Response.UserResponse;
+import com.demo.MovieMania.Repository.MovieRepository;
 import com.demo.MovieMania.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +22,8 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
-
+    @Autowired
+    public MovieRepository movieRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -94,5 +95,26 @@ public class UserService {
         if(mobile == null) return false;
         Matcher matcher3= MOBILE_PATTERN.matcher(mobile);
         return matcher3.matches() && !userRepository.existsByMobile(mobile);
+    }
+
+    public UserResponse addFavourite(Long userId, Long movieId) {
+        boolean flag1= userRepository.findById(userId).isPresent(), flag2= movieRepository.findById(movieId).isPresent();
+        if(!flag1) return UserResponse.builder().message("User with the given ID doesn't exists.").build();
+        if(!flag2) return UserResponse.builder().message("Movie with the given ID doesn't exists.").build();
+
+        Movie m= movieRepository.findById(movieId).get();
+        User u= userRepository.findById(userId).get();
+        u.getFavourite().add(m);
+        //m.setUser(u);
+        userRepository.save(u);
+        return u.toResponse("This movie is added as favourite for user named " + u.getName());
+    }
+
+    public List<MovieResponse> getFavourite(Long userId) {
+        boolean flag1= userRepository.findById(userId).isPresent();
+        System.out.println(flag1);
+        if(!flag1) return new ArrayList<>();
+        User u= userRepository.findById(userId).get();
+        return u.getFavourite().stream().map(Movie::toResponse).toList();
     }
 }

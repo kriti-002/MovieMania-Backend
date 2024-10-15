@@ -3,6 +3,7 @@ package com.demo.MovieMania.Controller;
 import com.demo.MovieMania.Model.Domain.User;
 import com.demo.MovieMania.Model.Request.UserLoginRequest;
 import com.demo.MovieMania.Model.Request.UserRequest;
+import com.demo.MovieMania.Model.Response.MovieResponse;
 import com.demo.MovieMania.Model.Response.UserLoginResponse;
 import com.demo.MovieMania.Model.Response.UserResponse;
 import com.demo.MovieMania.Service.AuthenticationService;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 public class UserController {
@@ -71,6 +73,14 @@ public class UserController {
     @PutMapping("/admin/update")
     public UserResponse updateUser(@RequestParam Long id, @RequestBody UserRequest u){
         return userService.updateUserDetails(id, u);
+    }
+    @PostMapping("/user/addFavourite")
+    public UserResponse addFavourite(@RequestParam Long userId, @RequestParam Long movieId){
+        return userService.addFavourite(userId, movieId);
+    }
+    @GetMapping("/user/getFavourite")
+    public List<MovieResponse> getFavourite(@RequestParam Long userId){
+        return userService.getFavourite(userId);
     }
 
 }

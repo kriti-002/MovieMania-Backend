@@ -25,7 +25,7 @@ public class ReviewService {
 
     public ReviewResponse addReview(Review r){
         Long id= r.getMovie().getId();
-        System.out.println(id);
+        //System.out.println(id);
         Movie movie=movieRepository.findById(r.getMovie().getId()).orElse(null);
         reviewRepository.save(r);
 
