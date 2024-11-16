@@ -1,7 +1,3 @@
-To integrate the functionalities from the image you shared with the README, I'll add the corresponding details to the **API Endpoints** section. Below is the updated version with the functionalities mentioned in the screenshot.
-
----
-
 # **MovieMania - Spring Boot Application**
 
 ## **Overview**
